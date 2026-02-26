@@ -7,6 +7,7 @@ use single_instance::SingleInstance;
 
 mod appearance;
 mod defaults;
+mod macos_app;
 mod refresh;
 mod relaunch;
 mod screen;

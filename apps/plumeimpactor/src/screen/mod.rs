@@ -116,6 +116,7 @@ impl Impactor {
             let (id, open_task) = window::open(defaults::default_window_settings());
             (Some(id), open_task.discard())
         };
+        crate::macos_app::set_main_window_visible(main_window.is_some());
 
         (
             Self {
@@ -301,6 +302,7 @@ impl Impactor {
                 }
             }
             Message::ShowWindow => {
+                crate::macos_app::set_main_window_visible(true);
                 if let Some(id) = self.main_window {
                     window::gain_focus(id)
                 } else {
@@ -312,6 +314,7 @@ impl Impactor {
             Message::HideWindow => {
                 if let Some(id) = self.main_window {
                     self.main_window = None;
+                    crate::macos_app::set_main_window_visible(false);
                     window::close(id)
                 } else {
                     Task::none()
