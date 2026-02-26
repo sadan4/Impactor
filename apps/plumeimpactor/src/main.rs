@@ -2,12 +2,13 @@
 
 use crate::refresh::spawn_refresh_daemon;
 
-#[cfg(any(target_os = "linux", target_os = "windows"))]
+#[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
 use single_instance::SingleInstance;
 
 mod appearance;
 mod defaults;
 mod refresh;
+mod relaunch;
 mod screen;
 mod startup;
 mod subscriptions;
@@ -23,10 +24,13 @@ fn main() -> iced::Result {
         .install_default()
         .ok();
 
-    #[cfg(any(target_os = "linux", target_os = "windows"))]
-    let _single_instance = match SingleInstance::new(APP_NAME) {
+    #[cfg(any(target_os = "linux", target_os = "windows", target_os = "macos"))]
+    let _single_instance = match SingleInstance::new(&crate::relaunch::single_instance_key()) {
         Ok(instance) => {
             if !instance.is_single() {
+                if let Err(err) = crate::relaunch::notify_running_instance() {
+                    log::warn!("Failed to signal existing instance: {err}");
+                }
                 log::info!("Another instance is already running; exiting.");
                 return Ok(());
             }

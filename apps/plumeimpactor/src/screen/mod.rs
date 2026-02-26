@@ -56,6 +56,7 @@ pub enum Message {
     UpdateTrayMenu,
 
     // Window management
+    RelaunchRequested,
     ShowWindow,
     HideWindow,
     Quit,
@@ -291,6 +292,13 @@ impl Impactor {
             Message::GtkTick => {
                 while gtk::glib::MainContext::default().iteration(false) {}
                 Task::none()
+            }
+            Message::RelaunchRequested => {
+                if self.main_window.is_none() {
+                    Task::done(Message::ShowWindow)
+                } else {
+                    Task::none()
+                }
             }
             Message::ShowWindow => {
                 if let Some(id) = self.main_window {
@@ -700,6 +708,7 @@ impl Impactor {
             };
 
         let tray_menu_refresh_subscription = subscriptions::tray_menu_refresh_subscription();
+        let relaunch_subscription = subscriptions::relaunch_subscription();
 
         let close_subscription = iced::event::listen_with(|event, _status, _id| {
             if let iced::Event::Window(window::Event::CloseRequested) = event {
@@ -714,6 +723,7 @@ impl Impactor {
             hover_subscription,
             progress_subscription,
             tray_menu_refresh_subscription,
+            relaunch_subscription,
             close_subscription,
         ])
     }
